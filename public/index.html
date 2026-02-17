@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alakhdhani Hardware</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Alakhdhani Hardware</h1>
+    <nav class="nav">
+      <button data-tab="dashboard">Dashboard</button>
+      <button data-tab="items">Items</button>
+      <button data-tab="customers">Customers</button>
+      <button data-tab="new-bill">New Bill</button>
+      <button data-tab="bills">Bill History</button>
+      <button data-tab="search">Search</button>
+      <button data-tab="report">Monthly Report</button>
+      <button data-tab="company-setup">Profile</button>
+      <button data-tab="login">Login</button>
+      <button data-tab="signup">Signup</button>
+      <button id="logout-btn" class="hidden">Logout</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="dashboard" class="tab">
+      <h2>Overview</h2>
+      <div class="dash-grid">
+        <div class="card stat"><div class="stat-title">Total Invoices</div><div class="stat-value" id="stat-bills">0</div></div>
+        <div class="card stat"><div class="stat-title">Total Revenue</div><div class="stat-value" id="stat-revenue">0.00</div></div>
+        
+        <div class="card stat"><div class="stat-title">Customers</div><div class="stat-value" id="stat-customers">0</div></div>
+      </div>
+      <div class="card">
+        <div class="dash-header">
+          <h3>Invoice Overview</h3>
+          <div class="dash-filters">
+            <select id="dash-year"></select>
+            <select id="dash-month">
+              <option value="">All</option>
+              <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
+              <option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option>
+              <option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option>
+              <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+            </select>
+          </div>
+        </div>
+        <table id="dashboard-bills">
+          <thead>
+            <tr><th>Invoice ID</th><th>Bill #</th><th>Customer</th><th>Date</th><th>Amount</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    <section id="login" class="tab hidden">
+      <h2>Login</h2>
+      <form id="login-form" class="card form-grid">
+        <input type="text" id="login-username" placeholder="Username" required />
+        <input type="password" id="login-password" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+    </section>
+    <section id="signup" class="tab hidden">
+      <h2>Signup</h2>
+      <form id="signup-form" class="card form-grid">
+        <input type="text" id="signup-username" placeholder="Username" required />
+        <input type="password" id="signup-password" placeholder="Password (min 4 chars)" required />
+        <input type="text" id="signup-company" placeholder="Company Name" required />
+        <input type="text" id="signup-address" placeholder="Address" required />
+        <input type="tel" id="signup-phone1" placeholder="Phone Number" required />
+        <input type="tel" id="signup-phone2" placeholder="Alternate Phone (optional)" />
+        <input type="email" id="signup-email" placeholder="Email Address" required />
+        <button type="submit">Create Account</button>
+      </form>
+    </section>
+    <section id="report" class="tab hidden">
+      <h2>Monthly Sales & Customer Report</h2>
+      <div class="card form-grid">
+        <select id="report-month">
+          <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
+          <option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option>
+          <option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option>
+          <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+        </select>
+        <select id="report-year"></select>
+        <button id="report-fetch">Fetch</button>
+        <button id="report-export-csv">Export Excel</button>
+        <button id="report-export-pdf">Export PDF</button>
+      </div>
+      <div class="card" id="report-print-area">
+        <div class="dash-header">
+          <h3 id="report-title">Report</h3>
+        </div>
+        <table id="report-table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Item</th>
+              <th>Bill Date</th>
+              <th>Bill #</th>
+              <th>Quantity</th>
+              <th>Total Amount</th>
+              <th>Paid Amount</th>
+              <th>Pending Amount</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4"><strong>Grand Totals</strong></td>
+              <td id="gt-qty">0</td>
+              <td id="gt-amount">0.00</td>
+              <td id="gt-paid">0.00</td>
+              <td id="gt-pending">0.00</td>
+            </tr>
+          </tfoot>
+        </table>
+        <div class="totals mt">
+          <h4>Customer-wise Totals</h4>
+          <table id="customer-totals">
+            <thead><tr><th>Customer</th><th>Quantity</th><th>Total Amount</th><th>Paid</th><th>Pending</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="totals mt">
+          <h4>Item-wise Totals</h4>
+          <table id="item-totals">
+            <thead><tr><th>Item</th><th>Quantity</th><th>Total Amount</th><th>Paid</th><th>Pending</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <section id="items" class="tab">
+      <h2>Items</h2>
+      <form id="item-form" class="card form-grid">
+        <input type="text" id="item-name" placeholder="Item Name" required />
+        <input type="number" id="item-size" placeholder="Size (inches)" step="0.01" min="0" />
+        <input type="number" id="item-price" placeholder="Price" step="0.01" required />
+        <input type="hidden" id="item-qty" value="0" />
+        <button type="submit">Add / Update Item</button>
+        <input type="hidden" id="item-id" />
+      </form>
+      <div class="card">
+        <table id="items-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Name</th><th>Size (in)</th><th>Price</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="customers" class="tab hidden">
+      <h2>Customers</h2>
+      <form id="customer-form" class="card form-grid">
+        <input type="text" id="cust-name" placeholder="Customer Name" required />
+        <input type="text" id="cust-gst" placeholder="GST ID" />
+        <input type="text" id="cust-phone" placeholder="Phone Number" />
+        <input type="text" id="cust-address" placeholder="Address" />
+        <button type="submit">Add / Update Customer</button>
+        <input type="hidden" id="cust-id" />
+      </form>
+      <div class="card">
+        <table id="customers-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Name</th><th>GST</th><th>Phone</th><th>Address</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="new-bill" class="tab hidden">
+      <h2>New Bill</h2>
+      <div class="card">
+        <div class="form-grid">
+          <input type="text" id="bill-number" placeholder="Bill Number" />
+          <input type="date" id="bill-date" />
+          <select id="bill-customer"></select>
+        </div>
+        <div class="items-grid">
+          <div class="grid-header">
+            <span>Item</span><span>Size (in)</span><span>Price</span><span>Qty</span><span>Total</span><span>Action</span>
+          </div>
+          <div id="bill-items"></div>
+          <button id="add-item-row">Add Item</button>
+        </div>
+        <input type="hidden" id="edit-bill-id" />
+        <div class="totals">
+          <label>Subtotal: <span id="subtotal">0.00</span></label>
+          <label>GST %: <input type="number" id="gst-percent" value="18" min="0" step="0.01" /></label>
+          <label>GST Amount: <span id="gst-amount">0.00</span></label>
+          <label>Discount %: <input type="number" id="discount" value="0" min="0" step="0.01" /></label>
+          <label>Grand Total: <strong id="grand-total">0.00</strong></label>
+          <label>Paid Amount: <input type="number" id="paid-amount" value="0" min="0" step="0.01" /></label>
+          <label>Pending Amount: <strong id="pending-amount">0.00</strong></label>
+        </div>
+        <div class="actions">
+          <button id="save-bill">Save Bill</button>
+          <button id="print-bill">Print / Save PDF</button>
+        </div>
+      </div>
+      <div id="invoice" class="card print-area hidden invoice">
+        <div class="inv-header">
+          <div class="inv-company">
+            <div class="inv-title">INVOICE</div>
+            <div class="company-block">
+              <div class="company-name" id="company-name">Your Company</div>
+              <div id="company-address">Address</div>
+              <div id="company-email">Email</div>
+              <div id="company-phone">Phone</div>
+            </div>
+          </div>
+          <div class="inv-logo"><img id="inv-logo-img" src="logo.jpg" alt="Alakhdhani Hardware logo"></div>
+        </div>
+        <div class="inv-meta">
+          <div class="bill-to">
+            <div class="label">Bill To</div>
+            <div id="inv-billto"></div>
+          </div>
+          <div class="meta-table">
+            <table>
+              <tbody>
+                <tr><td>Invoice No</td><td id="inv-no"></td></tr>
+                <tr><td>Invoice Date</td><td id="inv-date"></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <table id="invoice-items" class="inv-items">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Description</th>
+              <th>Size (in)</th>
+              <th>Qty</th>
+              <th>Rate</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="inv-summary">
+          <div class="totals-box">
+            <table>
+              <tbody>
+                <tr><td>Subtotal</td><td id="tot-sub">0.00</td></tr>
+                <tr><td>GST <span id="tot-gst-percent"></span></td><td id="tot-gst">0.00</td></tr>
+                <tr><td>Discount</td><td id="tot-discount">0.00</td></tr>
+                <tr class="grand"><td>Grand Total</td><td id="tot-grand">0.00</td></tr>
+                <tr><td>Paid Amount</td><td id="tot-paid">0.00</td></tr>
+                <tr><td>Pending Amount</td><td id="tot-pending">0.00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="inv-footer">
+          <div class="notes">
+            <div>Payment instructions</div>
+            <div>Thank you for your business</div>
+          </div>
+          <div class="signature">Authorized Signatory</div>
+        </div>
+      </div>
+    </section>
+    <section id="company-setup" class="tab hidden">
+      <h2>Profile</h2>
+      <div class="card form-grid">
+        <input type="text" id="comp-name" placeholder="Company Name" required />
+        <input type="text" id="comp-address" placeholder="Address" />
+        <input type="text" id="comp-phone" placeholder="Phone" />
+        <input type="text" id="comp-phone2" placeholder="Alternate Phone (optional)" />
+        <input type="email" id="comp-email" placeholder="Email" />
+        <input type="file" id="comp-logo" accept="image/png,image/jpeg" />
+        <button id="comp-save">Save Profile</button>
+      </div>
+      <div class="card">Please complete your company details. This appears on invoices.</div>
+    </section>
+
+    <section id="bills" class="tab hidden">
+      <h2>Bill History</h2>
+      <div class="card">
+        <table id="bills-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Bill #</th><th>Date</th><th>Customer</th><th>Subtotal</th><th>GST</th><th>Discount</th><th>Grand</th><th>Paid</th><th>Pending</th><th>Details</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id="bill-details" class="card hidden"></div>
+    </section>
+    <section id="search" class="tab hidden">
+      <h2>Advanced Invoice Search</h2>
+      <div class="card form-grid">
+        <input type="text" id="search-name" placeholder="Customer Name" />
+        <input type="text" id="search-billno" placeholder="Bill Number" />
+        <input type="date" id="search-from" />
+        <input type="date" id="search-to" />
+        <select id="search-status">
+          <option value="">All</option>
+          <option value="Paid">Paid</option>
+          <option value="Unpaid">Unpaid</option>
+          <option value="Partial">Partial</option>
+        </select>
+        <input type="text" id="search-phone" placeholder="Mobile Number" />
+        <button id="search-run">Search</button>
+        <button id="search-reset">Reset</button>
+      </div>
+      <div class="card">
+        <table id="search-results">
+          <thead>
+            <tr>
+              <th>Bill #</th><th>Date</th><th>Customer</th><th>Grand Total</th><th>Paid</th><th>Pending</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    <section id="outstanding" class="tab hidden">
+      <h2>Customer Outstanding Report</h2>
+      <div class="card form-grid">
+        <input type="text" id="out-search" placeholder="Search name / phone / GSTIN" />
+        <input type="date" id="out-from" />
+        <input type="date" id="out-to" />
+        <button id="out-fetch">Fetch</button>
+        <button id="out-export-csv">Export Excel</button>
+        <button id="out-export-pdf">Export PDF</button>
+        <button id="out-print">Print</button>
+      </div>
+      <div class="card" id="out-print-area">
+        <table id="out-table">
+          <thead>
+            <tr>
+              <th data-key="customer_name">Customer</th>
+              <th data-key="phone">Mobile</th>
+              <th data-key="gst_id">GSTIN</th>
+              <th data-key="bills_count">Total Bills</th>
+              <th data-key="total_paid">Total Paid ₹</th>
+              <th data-key="total_pending">Total Pending ₹</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div id="out-totals" class="mt"></div>
+      </div>
+      <div class="card hidden" id="out-detail">
+        <h3 id="out-detail-title">Customer Invoices</h3>
+        <table id="out-detail-table">
+          <thead>
+            <tr><th>Bill #</th><th>Date</th><th>Grand Total</th><th>Paid</th><th>Pending</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Inventory & Billing System</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
