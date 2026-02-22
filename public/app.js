@@ -541,6 +541,7 @@ async function loadBills(customerId) {
         <button class="btn btn-primary" onclick="viewBill(${b.id})">View</button>
         <button class="btn btn-primary" onclick="editBill(${b.id})">Edit</button>
         <button class="btn" onclick="printBill(${b.id})">Print</button>
+        <button class="btn btn-success" onclick="shareBill(${b.id})">Share</button>
         <button class="btn btn-danger" onclick="deleteBill(${b.id})">Delete</button>
       </td>
     </tr>`).join('');
@@ -578,6 +579,7 @@ async function runSearch() {
       <td>
         <button class="btn btn-primary" onclick="event.stopPropagation(); viewBill(${b.id}); document.querySelector('[data-tab=\\\"bills\\\"]').click();">View</button>
         <button class="btn" onclick="event.stopPropagation(); printBill(${b.id})">Print/PDF</button>
+        <button class="btn btn-success" onclick="event.stopPropagation(); shareBill(${b.id})">Share</button>
         <button class="btn btn-danger" onclick="event.stopPropagation(); deleteBill(${b.id})">Delete</button>
       </td>
     </tr>`).join('');
@@ -627,6 +629,7 @@ window.viewBill = async (id) => {
     <div class="actions">
       <button class="btn btn-primary" onclick="editBill(${b.id})">Edit</button>
       <button class="btn" onclick="printBill(${b.id})">Print</button>
+      <button class="btn btn-success" onclick="shareBill(${b.id})">Share</button>
     </div>
     <table style="margin-top:8px;">
       <thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
@@ -746,6 +749,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     await ensureCompanyProfile();
   }
 });
+
+window.shareBill = async (id) => {
+  const res = await fetch(`${API.bills}/${id}`);
+  const data = await res.json();
+  const b = data.bill;
+  const items = data.items;
+
+  let message = `*Invoice from ${currentProfile?.company_name || 'Alakhdhani Hardware'}*\n\n`;
+  message += `Bill No: ${b.bill_number}\n`;
+  message += `Date: ${dateOnly(b.bill_date)}\n\n`;
+  message += `*Items:*\n`;
+
+  items.forEach((item, index) => {
+    const sizeStr = (item.size && item.size !== '0' && item.size !== '0.00') ? ` (Size: ${item.size})` : '';
+    message += `${index + 1}. ${item.name}${sizeStr} - Qty: ${item.quantity} - Rate: ${Number(item.price).toFixed(2)} - Total: ${Number(item.total).toFixed(2)}\n`;
+  });
+
+  message += `\nSubtotal: ${Number(b.subtotal).toFixed(2)}\n`;
+  if (Number(b.gst_amount) > 0) message += `GST (${b.gst_percent}%): ${Number(b.gst_amount).toFixed(2)}\n`;
+  if (Number(b.discount) > 0) message += `Discount: ${Number(b.discount).toFixed(2)}\n`;
+  message += `*Grand Total: ${Number(b.grand_total).toFixed(2)}*\n\n`;
+  message += `Paid: ${Number(b.paid_amount || 0).toFixed(2)}\n`;
+  message += `*Pending: ${Number(b.pending_amount || 0).toFixed(2)}*\n\n`;
+  message += `Thank you for your business!`;
+
+  const phone = b.phone ? b.phone.replace(/\D/g, '') : '';
+  const whatsappUrl = `https://wa.me/${phone.length === 10 ? '91' + phone : phone}?text=${encodeURIComponent(message)}`;
+  window.open(whatsappUrl, '_blank');
+};
+
+const shareBillWaBtn = document.getElementById('share-bill-wa');
+if (shareBillWaBtn) {
+  shareBillWaBtn.addEventListener('click', () => {
+    const billId = document.getElementById('edit-bill-id').value;
+    if (billId) {
+      shareBill(billId);
+    } else {
+      alert('Save the bill first to share on WhatsApp');
+    }
+  });
+}
 
 // Dashboard
 async function loadDashboard() {
