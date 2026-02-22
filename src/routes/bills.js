@@ -135,7 +135,7 @@ router.get('/:id', async (req, res) => {
     );
     if (billRows.length === 0) return res.status(404).json({ error: 'Bill not found' });
     const [items] = await pool.query(
-      `SELECT bi.item_id, i.name, i.size, bi.quantity, bi.price, bi.total
+      `SELECT bi.item_id, i.name, bi.size, bi.quantity, bi.price, bi.total
        FROM bill_items bi
        JOIN items i ON bi.item_id = i.id
        WHERE bi.bill_id = ?`,
@@ -197,9 +197,9 @@ router.post('/', async (req, res) => {
 
     for (const it of items) {
       await conn.query(
-        `INSERT INTO bill_items (bill_id, item_id, quantity, price, total)
-         VALUES (?, ?, ?, ?, ?)`,
-        [billId, it.item_id, it.quantity, it.price, it.total]
+        `INSERT INTO bill_items (bill_id, item_id, size, quantity, price, total)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [billId, it.item_id, it.size, it.quantity, it.price, it.total]
       );
     }
 
@@ -289,9 +289,9 @@ router.put('/:id', async (req, res) => {
     );
     for (const it of items) {
       await conn.query(
-        `INSERT INTO bill_items (bill_id, item_id, quantity, price, total)
-         VALUES (?, ?, ?, ?, ?)`,
-        [id, it.item_id, it.quantity, it.price, it.total]
+        `INSERT INTO bill_items (bill_id, item_id, size, quantity, price, total)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [id, it.item_id, it.size, it.quantity, it.price, it.total]
       );
     }
     await conn.commit();

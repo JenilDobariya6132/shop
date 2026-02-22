@@ -57,6 +57,7 @@ router.get('/monthly', async (req, res) => {
         b.id AS bill_id,
         b.bill_number,
         b.bill_date,
+        bi.size,
         SUM(bi.quantity) AS quantity,
         SUM(bi.total) AS amount,
         CASE WHEN b.grand_total > 0 

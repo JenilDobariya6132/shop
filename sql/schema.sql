@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS bill_items (
   id INT AUTO_INCREMENT PRIMARY KEY,
   bill_id INT NOT NULL,
   item_id INT NOT NULL,
+  size VARCHAR(50),
   quantity INT NOT NULL,
   price DECIMAL(10,2) NOT NULL,
   total DECIMAL(12,2) NOT NULL,

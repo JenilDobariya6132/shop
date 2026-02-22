@@ -383,8 +383,10 @@ function makeItemRow() {
   select.addEventListener('change', () => {
     const opt = select.selectedOptions[0] || {};
     const ds = opt.dataset || {};
-    size.value = ds.size || '';
-    price.value = ds.price || '';
+    const sVal = ds.size || '';
+    const pVal = ds.price || '';
+    size.value = (sVal == '0' || sVal == '0.00') ? '' : sVal;
+    price.value = (pVal == '0' || pVal == '0.00') ? '' : pVal;
     qty.value = '';
     total.value = '';
     recalcTotals();
@@ -440,7 +442,8 @@ saveBillBtn.addEventListener('click', async () => {
     const item_id = Number(select.value);
     const price = Number(r.children[2].value || 0);
     const qty = Number(r.children[3].value || 0);
-    if (item_id && qty > 0) items.push({ item_id, quantity: qty, price });
+    const size = r.children[1].value;
+    if (item_id && qty > 0) items.push({ item_id, quantity: qty, price, size });
   });
   if (items.length === 0) { alert('Add at least one item'); return; }
 
@@ -494,9 +497,9 @@ async function showInvoice(id) {
     `<tr>
       <td>${idx + 1}</td>
       <td>${i.name}</td>
-      <td>${i.size || ''}</td>
+      <td>${(i.size == '0' || i.size == '0.00' || !i.size) ? '' : i.size}</td>
       <td>${i.quantity}</td>
-      <td>${Number(i.price).toFixed(2)}</td>
+      <td>${(Number(i.price) === 0) ? '' : Number(i.price).toFixed(2)}</td>
       <td>${Number(i.total).toFixed(2)}</td>
     </tr>`
   ).join('');
@@ -628,7 +631,7 @@ window.viewBill = async (id) => {
     <table style="margin-top:8px;">
       <thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
       <tbody>
-        ${data.items.map(i => `<tr><td>${i.name}</td><td>${i.size || ''}</td><td>${i.quantity}</td><td>${Number(i.price).toFixed(2)}</td><td>${Number(i.total).toFixed(2)}</td></tr>`).join('')}
+        ${data.items.map(i => `<tr><td>${i.name}</td><td>${(i.size == '0' || i.size == '0.00' || !i.size) ? '' : i.size}</td><td>${i.quantity}</td><td>${(Number(i.price) === 0) ? '' : Number(i.price).toFixed(2)}</td><td>${Number(i.total).toFixed(2)}</td></tr>`).join('')}
       </tbody>
     </table>
     <p><strong>Paid:</strong> ${Number(b.paid_amount || 0).toFixed(2)} &nbsp; <strong>Pending:</strong> ${Number(b.pending_amount || 0).toFixed(2)}</p>
@@ -694,7 +697,10 @@ window.editBill = async (id) => {
     const total = row.children[4];
     select.value = i.item_id;
     select.dispatchEvent(new Event('change'));
-    price.value = Number(i.price).toFixed(2);
+    const sVal = i.size || '';
+    const pVal = Number(i.price || 0);
+    size.value = (sVal == '0' || sVal == '0.00') ? '' : sVal;
+    price.value = (pVal === 0) ? '' : pVal.toFixed(2);
     qty.value = i.quantity;
     total.value = (Number(i.price) * Number(i.quantity)).toFixed(2);
     billItemsWrapper.appendChild(row);
@@ -849,6 +855,7 @@ function renderMonthlyReport() {
       <tr>
         <td>${r.customer_name}</td>
         <td>${r.item_name}</td>
+        <td>${(r.size == '0' || r.size == '0.00' || !r.size) ? '' : r.size}</td>
         <td>${String(r.bill_date || '').slice(0, 10)}</td>
         <td>${r.bill_number}</td>
         <td>${Number(r.quantity).toFixed(0)}</td>
@@ -902,12 +909,13 @@ function renderMonthlyReport() {
 
 function exportReportCsv() {
   const rows = reportCache.rows || [];
-  const headers = ['Customer', 'Item', 'Bill Date', 'Bill #', 'Quantity', 'Total Amount', 'Paid Amount', 'Pending Amount'];
+  const headers = ['Customer', 'Item', 'Size', 'Bill Date', 'Bill #', 'Quantity', 'Total Amount', 'Paid Amount', 'Pending Amount'];
   const lines = [headers.join(',')];
   for (const r of rows) {
     const line = [
       `"${(r.customer_name || '').replace(/"/g, '""')}"`,
       `"${(r.item_name || '').replace(/"/g, '""')}"`,
+      `"${(r.size || '').replace(/"/g, '""')}"`,
       String(r.bill_date || '').slice(0, 10),
       `"${(r.bill_number || '').replace(/"/g, '""')}"`,
       Number(r.quantity || 0).toFixed(0),
