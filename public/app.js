@@ -349,7 +349,6 @@ const grandTotalEl = document.getElementById('grand-total');
 const paidAmountEl = document.getElementById('paid-amount');
 const pendingAmountEl = document.getElementById('pending-amount');
 const saveBillBtn = document.getElementById('save-bill');
-const printBillBtn = document.getElementById('print-bill');
 const invoiceArea = document.getElementById('invoice');
 const invoiceItemsBody = document.querySelector('#invoice-items tbody');
 const invBillTo = document.getElementById('inv-billto');
@@ -514,13 +513,9 @@ async function showInvoice(id) {
   if (totPending) totPending.textContent = Number(b.pending_amount || 0).toFixed(2);
   invoiceArea.classList.remove('hidden');
 }
-printBillBtn.addEventListener('click', () => {
-  if (invoiceArea.classList.contains('hidden')) {
-    alert('Save the bill first to generate invoice preview');
-    return;
-  }
-  window.print();
-});
+
+// Remove printBillBtn listener if it exists
+// printBillBtn.addEventListener('click', () => { ... });
 
 // Bills history
 const billsTableBody = document.querySelector('#bills-table tbody');
@@ -540,9 +535,8 @@ async function loadBills(customerId) {
       <td>
         <button class="btn btn-primary" onclick="viewBill(${b.id})">View</button>
         <button class="btn btn-primary" onclick="editBill(${b.id})">Edit</button>
-        <button class="btn" onclick="printBill(${b.id})">Print</button>
         <button class="btn btn-primary" onclick="generatePdf(${b.id})">PDF</button>
-        <button class="btn btn-success" onclick="shareBill(${b.id})">Share</button>
+        <button class="btn btn-success" onclick="shareBill(${b.id})">Share PDF</button>
         <button class="btn btn-danger" onclick="deleteBill(${b.id})">Delete</button>
       </td>
     </tr>`).join('');
@@ -579,9 +573,8 @@ async function runSearch() {
       <td>${b.status}</td>
       <td>
         <button class="btn btn-primary" onclick="event.stopPropagation(); viewBill(${b.id}); document.querySelector('[data-tab=\\\"bills\\\"]').click();">View</button>
-        <button class="btn" onclick="event.stopPropagation(); printBill(${b.id})">Print/PDF</button>
         <button class="btn btn-primary" onclick="event.stopPropagation(); generatePdf(${b.id})">Save PDF</button>
-        <button class="btn btn-success" onclick="event.stopPropagation(); shareBill(${b.id})">Share</button>
+        <button class="btn btn-success" onclick="event.stopPropagation(); shareBill(${b.id})">Share PDF</button>
         <button class="btn btn-danger" onclick="event.stopPropagation(); deleteBill(${b.id})">Delete</button>
       </td>
     </tr>`).join('');
@@ -630,9 +623,8 @@ window.viewBill = async (id) => {
     <p><strong>Paid:</strong> ${Number(b.paid_amount || 0).toFixed(2)} &nbsp; <strong>Pending:</strong> ${Number(b.pending_amount || 0).toFixed(2)}</p>
     <div class="actions">
       <button class="btn btn-primary" onclick="editBill(${b.id})">Edit</button>
-      <button class="btn" onclick="printBill(${b.id})">Print</button>
       <button class="btn btn-primary" onclick="generatePdf(${b.id})">Save PDF</button>
-      <button class="btn btn-success" onclick="shareBill(${b.id})">Share</button>
+      <button class="btn btn-success" onclick="shareBill(${b.id})">Share PDF</button>
     </div>
     <table style="margin-top:8px;">
       <thead><tr><th>Item</th><th>Size</th><th>Qty</th><th>Price</th><th>Total</th></tr></thead>
@@ -715,21 +707,8 @@ window.editBill = async (id) => {
   document.getElementById('edit-bill-id').value = id;
   saveBillBtn.textContent = 'Update Bill';
 };
-window.printBill = async (id) => {
-  await showInvoice(id);
-  // switch to New Bill tab so invoice is visible as preview before print
-  const newBillBtn = document.querySelector('[data-tab="new-bill"]');
-  if (newBillBtn) newBillBtn.click();
-  // wait a moment for layout and images to render
-  const logoImg = document.querySelector('.inv-logo img');
-  const next = () => setTimeout(() => window.print(), 150);
-  if (logoImg && !logoImg.complete) {
-    logoImg.onload = next;
-    logoImg.onerror = next;
-  } else {
-    next();
-  }
-};
+
+// Removed printBill
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
@@ -754,32 +733,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 window.shareBill = async (id) => {
-  const res = await fetch(`${API.bills}/${id}`);
-  const data = await res.json();
-  const b = data.bill;
-  const items = data.items;
+  await showInvoice(id);
+  const element = document.getElementById('invoice');
+  const billNo = document.getElementById('inv-no').textContent || 'bill';
 
-  let message = `*Invoice from ${currentProfile?.company_name || 'Alakhdhani Hardware'}*\n\n`;
-  message += `Bill No: ${b.bill_number}\n`;
-  message += `Date: ${dateOnly(b.bill_date)}\n\n`;
-  message += `*Items:*\n`;
+  const opt = {
+    margin: 10,
+    filename: `Bill_${billNo}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
 
-  items.forEach((item, index) => {
-    const sizeStr = (item.size && item.size !== '0' && item.size !== '0.00') ? ` (Size: ${item.size})` : '';
-    message += `${index + 1}. ${item.name}${sizeStr} - Qty: ${item.quantity} - Rate: ${Number(item.price).toFixed(2)} - Total: ${Number(item.total).toFixed(2)}\n`;
-  });
+  try {
+    const pdfBlob = await html2pdf().set(opt).from(element).output('blob');
+    const file = new File([pdfBlob], `Bill_${billNo}.pdf`, { type: 'application/pdf' });
 
-  message += `\nSubtotal: ${Number(b.subtotal).toFixed(2)}\n`;
-  if (Number(b.gst_amount) > 0) message += `GST (${b.gst_percent}%): ${Number(b.gst_amount).toFixed(2)}\n`;
-  if (Number(b.discount) > 0) message += `Discount: ${Number(b.discount).toFixed(2)}\n`;
-  message += `*Grand Total: ${Number(b.grand_total).toFixed(2)}*\n\n`;
-  message += `Paid: ${Number(b.paid_amount || 0).toFixed(2)}\n`;
-  message += `*Pending: ${Number(b.pending_amount || 0).toFixed(2)}*\n\n`;
-  message += `Thank you for your business!`;
-
-  const phone = b.phone ? b.phone.replace(/\D/g, '') : '';
-  const whatsappUrl = `https://wa.me/${phone.length === 10 ? '91' + phone : phone}?text=${encodeURIComponent(message)}`;
-  window.open(whatsappUrl, '_blank');
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: `Bill ${billNo}`,
+        text: `Invoice from ${currentProfile?.company_name || 'Alakhdhani Hardware'}`
+      });
+    } else {
+      // Fallback: Download and alert
+      html2pdf().set(opt).from(element).save();
+      alert('Sharing PDF directly is not supported on this browser. The PDF has been downloaded instead. You can now send it manually via WhatsApp.');
+    }
+  } catch (err) {
+    console.error('Sharing failed:', err);
+    alert('Failed to generate or share PDF.');
+  }
 };
 
 const shareBillWaBtn = document.getElementById('share-bill-wa');
@@ -1010,24 +994,11 @@ function exportReportCsv() {
   setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
 }
 
-function exportReportPdf() {
-  const area = document.getElementById('report-print-area');
-  if (!area) return;
-  const w = window.open('', '_blank');
-  if (!w) return;
-  const title = `Monthly Report ${reportCache.year}-${reportCache.month}`;
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title><link rel="stylesheet" href="styles.css"></head><body>`);
-  w.document.write(`<h2 style="margin:8px 0;">${title}</h2>`);
-  w.document.write(area.outerHTML);
-  w.document.write('</body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(() => w.print(), 200);
-}
+
+if (reportFetchBtn) reportFetchBtn.addEventListener('click', loadMonthlyReport);
 
 if (reportFetchBtn) reportFetchBtn.addEventListener('click', loadMonthlyReport);
 if (reportExportCsvBtn) reportExportCsvBtn.addEventListener('click', exportReportCsv);
-if (reportExportPdfBtn) reportExportPdfBtn.addEventListener('click', exportReportPdf);
 
 // Auto-load report when the tab is opened
 const navButtons = document.querySelectorAll('.nav button[data-tab]');
@@ -1202,23 +1173,4 @@ function exportOutstandingCsv() {
   a.click();
   setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 0);
 }
-function exportOutstandingPdf() {
-  const area = document.getElementById('out-print-area');
-  if (!area) return;
-  const w = window.open('', '_blank');
-  if (!w) return;
-  const title = 'Customer Outstanding Report';
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title><link rel="stylesheet" href="styles.css"></head><body>`);
-  w.document.write(`<h2 style="margin:8px 0;">${title}</h2>`);
-  w.document.write(area.outerHTML);
-  w.document.write('</body></html>');
-  w.document.close();
-  w.focus();
-  setTimeout(() => w.print(), 200);
-}
-function printOutstanding() {
-  exportOutstandingPdf(); // reuse print view
-}
 if (outExportCsvBtn) outExportCsvBtn.addEventListener('click', exportOutstandingCsv);
-if (outExportPdfBtn) outExportPdfBtn.addEventListener('click', exportOutstandingPdf);
-if (outPrintBtn) outPrintBtn.addEventListener('click', printOutstanding);
