@@ -541,6 +541,7 @@ async function loadBills(customerId) {
         <button class="btn btn-primary" onclick="viewBill(${b.id})">View</button>
         <button class="btn btn-primary" onclick="editBill(${b.id})">Edit</button>
         <button class="btn" onclick="printBill(${b.id})">Print</button>
+        <button class="btn btn-primary" onclick="generatePdf(${b.id})">PDF</button>
         <button class="btn btn-success" onclick="shareBill(${b.id})">Share</button>
         <button class="btn btn-danger" onclick="deleteBill(${b.id})">Delete</button>
       </td>
@@ -579,6 +580,7 @@ async function runSearch() {
       <td>
         <button class="btn btn-primary" onclick="event.stopPropagation(); viewBill(${b.id}); document.querySelector('[data-tab=\\\"bills\\\"]').click();">View</button>
         <button class="btn" onclick="event.stopPropagation(); printBill(${b.id})">Print/PDF</button>
+        <button class="btn btn-primary" onclick="event.stopPropagation(); generatePdf(${b.id})">Save PDF</button>
         <button class="btn btn-success" onclick="event.stopPropagation(); shareBill(${b.id})">Share</button>
         <button class="btn btn-danger" onclick="event.stopPropagation(); deleteBill(${b.id})">Delete</button>
       </td>
@@ -629,6 +631,7 @@ window.viewBill = async (id) => {
     <div class="actions">
       <button class="btn btn-primary" onclick="editBill(${b.id})">Edit</button>
       <button class="btn" onclick="printBill(${b.id})">Print</button>
+      <button class="btn btn-primary" onclick="generatePdf(${b.id})">Save PDF</button>
       <button class="btn btn-success" onclick="shareBill(${b.id})">Share</button>
     </div>
     <table style="margin-top:8px;">
@@ -787,6 +790,32 @@ if (shareBillWaBtn) {
       shareBill(billId);
     } else {
       alert('Save the bill first to share on WhatsApp');
+    }
+  });
+}
+
+window.generatePdf = async (id) => {
+  await showInvoice(id);
+  const element = document.getElementById('invoice');
+  const billNo = document.getElementById('inv-no').textContent || 'bill';
+  const opt = {
+    margin: 10,
+    filename: `Bill_${billNo}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(element).save();
+};
+
+const savePdfBtn = document.getElementById('save-pdf-btn');
+if (savePdfBtn) {
+  savePdfBtn.addEventListener('click', () => {
+    const billId = document.getElementById('edit-bill-id').value;
+    if (billId) {
+      generatePdf(billId);
+    } else {
+      alert('Save the bill first to generate PDF');
     }
   });
 }
