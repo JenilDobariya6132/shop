@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alakhdhani Hardware</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <header class="topbar">
     <h1>Alakhdhani Hardware</h1>
@@ -28,10 +30,19 @@
     <section id="dashboard" class="tab">
       <h2>Overview</h2>
       <div class="dash-grid">
-        <div class="card stat"><div class="stat-title">Total Invoices</div><div class="stat-value" id="stat-bills">0</div></div>
-        <div class="card stat"><div class="stat-title">Total Revenue</div><div class="stat-value" id="stat-revenue">0.00</div></div>
-        
-        <div class="card stat"><div class="stat-title">Customers</div><div class="stat-value" id="stat-customers">0</div></div>
+        <div class="card stat">
+          <div class="stat-title">Total Invoices</div>
+          <div class="stat-value" id="stat-bills">0</div>
+        </div>
+        <div class="card stat">
+          <div class="stat-title">Total Revenue</div>
+          <div class="stat-value" id="stat-revenue">0.00</div>
+        </div>
+
+        <div class="card stat">
+          <div class="stat-title">Customers</div>
+          <div class="stat-value" id="stat-customers">0</div>
+        </div>
       </div>
       <div class="card">
         <div class="dash-header">
@@ -40,16 +51,30 @@
             <select id="dash-year"></select>
             <select id="dash-month">
               <option value="">All</option>
-              <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
-              <option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option>
-              <option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option>
-              <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+              <option value="01">Jan</option>
+              <option value="02">Feb</option>
+              <option value="03">Mar</option>
+              <option value="04">Apr</option>
+              <option value="05">May</option>
+              <option value="06">Jun</option>
+              <option value="07">Jul</option>
+              <option value="08">Aug</option>
+              <option value="09">Sep</option>
+              <option value="10">Oct</option>
+              <option value="11">Nov</option>
+              <option value="12">Dec</option>
             </select>
           </div>
         </div>
         <table id="dashboard-bills">
           <thead>
-            <tr><th>Invoice ID</th><th>Bill #</th><th>Customer</th><th>Date</th><th>Amount</th></tr>
+            <tr>
+              <th>Invoice ID</th>
+              <th>Bill #</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Amount</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -80,10 +105,18 @@
       <h2>Monthly Sales & Customer Report</h2>
       <div class="card form-grid">
         <select id="report-month">
-          <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
-          <option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option>
-          <option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option>
-          <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+          <option value="01">Jan</option>
+          <option value="02">Feb</option>
+          <option value="03">Mar</option>
+          <option value="04">Apr</option>
+          <option value="05">May</option>
+          <option value="06">Jun</option>
+          <option value="07">Jul</option>
+          <option value="08">Aug</option>
+          <option value="09">Sep</option>
+          <option value="10">Oct</option>
+          <option value="11">Nov</option>
+          <option value="12">Dec</option>
         </select>
         <select id="report-year"></select>
         <button id="report-fetch">Fetch</button>
@@ -121,14 +154,30 @@
         <div class="totals mt">
           <h4>Customer-wise Totals</h4>
           <table id="customer-totals">
-            <thead><tr><th>Customer</th><th>Quantity</th><th>Total Amount</th><th>Paid</th><th>Pending</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Quantity</th>
+                <th>Total Amount</th>
+                <th>Paid</th>
+                <th>Pending</th>
+              </tr>
+            </thead>
             <tbody></tbody>
           </table>
         </div>
         <div class="totals mt">
           <h4>Item-wise Totals</h4>
           <table id="item-totals">
-            <thead><tr><th>Item</th><th>Quantity</th><th>Total Amount</th><th>Paid</th><th>Pending</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Total Amount</th>
+                <th>Paid</th>
+                <th>Pending</th>
+              </tr>
+            </thead>
             <tbody></tbody>
           </table>
         </div>
@@ -138,8 +187,6 @@
       <h2>Items</h2>
       <form id="item-form" class="card form-grid">
         <input type="text" id="item-name" placeholder="Item Name" required />
-        <input type="number" id="item-size" placeholder="Size (inches)" step="0.01" min="0" />
-        <input type="number" id="item-price" placeholder="Price" step="0.01" required />
         <input type="hidden" id="item-qty" value="0" />
         <button type="submit">Add / Update Item</button>
         <input type="hidden" id="item-id" />
@@ -148,7 +195,9 @@
         <table id="items-table">
           <thead>
             <tr>
-              <th>ID</th><th>Name</th><th>Size (in)</th><th>Price</th><th>Actions</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -170,7 +219,12 @@
         <table id="customers-table">
           <thead>
             <tr>
-              <th>ID</th><th>Name</th><th>GST</th><th>Phone</th><th>Address</th><th>Actions</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>GST</th>
+              <th>Phone</th>
+              <th>Address</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -188,7 +242,8 @@
         </div>
         <div class="items-grid">
           <div class="grid-header">
-            <span>Item</span><span>Size (in)</span><span>Price</span><span>Qty</span><span>Total</span><span>Action</span>
+            <span>Item</span><span>Size
+              (in)</span><span>Price</span><span>Qty</span><span>Total</span><span>Action</span>
           </div>
           <div id="bill-items"></div>
           <button id="add-item-row">Add Item</button>
@@ -229,8 +284,14 @@
           <div class="meta-table">
             <table>
               <tbody>
-                <tr><td>Invoice No</td><td id="inv-no"></td></tr>
-                <tr><td>Invoice Date</td><td id="inv-date"></td></tr>
+                <tr>
+                  <td>Invoice No</td>
+                  <td id="inv-no"></td>
+                </tr>
+                <tr>
+                  <td>Invoice Date</td>
+                  <td id="inv-date"></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -252,12 +313,30 @@
           <div class="totals-box">
             <table>
               <tbody>
-                <tr><td>Subtotal</td><td id="tot-sub">0.00</td></tr>
-                <tr><td>GST <span id="tot-gst-percent"></span></td><td id="tot-gst">0.00</td></tr>
-                <tr><td>Discount</td><td id="tot-discount">0.00</td></tr>
-                <tr class="grand"><td>Grand Total</td><td id="tot-grand">0.00</td></tr>
-                <tr><td>Paid Amount</td><td id="tot-paid">0.00</td></tr>
-                <tr><td>Pending Amount</td><td id="tot-pending">0.00</td></tr>
+                <tr>
+                  <td>Subtotal</td>
+                  <td id="tot-sub">0.00</td>
+                </tr>
+                <tr>
+                  <td>GST <span id="tot-gst-percent"></span></td>
+                  <td id="tot-gst">0.00</td>
+                </tr>
+                <tr>
+                  <td>Discount</td>
+                  <td id="tot-discount">0.00</td>
+                </tr>
+                <tr class="grand">
+                  <td>Grand Total</td>
+                  <td id="tot-grand">0.00</td>
+                </tr>
+                <tr>
+                  <td>Paid Amount</td>
+                  <td id="tot-paid">0.00</td>
+                </tr>
+                <tr>
+                  <td>Pending Amount</td>
+                  <td id="tot-pending">0.00</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -291,7 +370,17 @@
         <table id="bills-table">
           <thead>
             <tr>
-              <th>ID</th><th>Bill #</th><th>Date</th><th>Customer</th><th>Subtotal</th><th>GST</th><th>Discount</th><th>Grand</th><th>Paid</th><th>Pending</th><th>Details</th>
+              <th>ID</th>
+              <th>Bill #</th>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Subtotal</th>
+              <th>GST</th>
+              <th>Discount</th>
+              <th>Grand</th>
+              <th>Paid</th>
+              <th>Pending</th>
+              <th>Details</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -320,7 +409,14 @@
         <table id="search-results">
           <thead>
             <tr>
-              <th>Bill #</th><th>Date</th><th>Customer</th><th>Grand Total</th><th>Paid</th><th>Pending</th><th>Status</th><th>Actions</th>
+              <th>Bill #</th>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Grand Total</th>
+              <th>Paid</th>
+              <th>Pending</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -358,7 +454,13 @@
         <h3 id="out-detail-title">Customer Invoices</h3>
         <table id="out-detail-table">
           <thead>
-            <tr><th>Bill #</th><th>Date</th><th>Grand Total</th><th>Paid</th><th>Pending</th></tr>
+            <tr>
+              <th>Bill #</th>
+              <th>Date</th>
+              <th>Grand Total</th>
+              <th>Paid</th>
+              <th>Pending</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
@@ -372,4 +474,5 @@
 
   <script src="app.js"></script>
 </body>
+
 </html>

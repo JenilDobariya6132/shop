@@ -33,7 +33,7 @@ window.fetch = (input, init = {}) => {
     if (sameOrigin && token) {
       init.headers = Object.assign({}, init.headers, { Authorization: `Bearer ${token}` });
     }
-  } catch {}
+  } catch { }
   return origFetch(input, init);
 };
 
@@ -213,7 +213,7 @@ async function loadItems() {
   itemsCache = items;
   itemsTableBody.innerHTML = items.map(it => `
     <tr>
-      <td>${it.id}</td><td>${it.name}</td><td>${it.size || ''}</td><td>${Number(it.price).toFixed(2)}</td>
+      <td>${it.id}</td><td>${it.name}</td>
       <td>
         <button class="btn btn-primary" onclick="editItemById(${it.id})">Edit</button>
         <button class="btn btn-danger" onclick="deleteItem(${it.id})">Delete</button>
@@ -225,8 +225,6 @@ window.editItemById = (id) => {
   if (!it) return;
   document.getElementById('item-id').value = it.id;
   document.getElementById('item-name').value = it.name || '';
-  document.getElementById('item-size').value = Number(it.size || 0) || '';
-  document.getElementById('item-price').value = it.price || 0;
   document.getElementById('item-qty').value = it.quantity || 0;
 };
 window.deleteItem = async (id) => {
@@ -237,15 +235,8 @@ window.deleteItem = async (id) => {
 itemForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('item-id').value;
-  const sizeNum = Number(document.getElementById('item-size').value);
-  if (!Number.isFinite(sizeNum)) {
-    alert('Size must be numeric inches');
-    return;
-  }
   const payload = {
     name: document.getElementById('item-name').value,
-    size: sizeNum,
-    price: Number(document.getElementById('item-price').value),
     quantity: Number(document.getElementById('item-qty').value),
   };
   if (id) {
@@ -305,12 +296,12 @@ window.deleteCustomer = async (id) => {
   let res = await fetch(`${API.customers}/${id}`, { method: 'DELETE' });
   if (!res.ok) {
     let msg = 'Failed to delete customer';
-    try { const data = await res.json(); msg = data.error || msg; } catch {}
+    try { const data = await res.json(); msg = data.error || msg; } catch { }
     // Offer cascade delete if blocked by bills
     if (res.status === 409 && confirm(`${msg}\n\nDo you want to delete all bills for this customer and then delete the customer?`)) {
       res = await fetch(`${API.customers}/${id}?force=true`, { method: 'DELETE' });
       if (!res.ok) {
-        try { const data2 = await res.json(); msg = data2.error || msg; } catch {}
+        try { const data2 = await res.json(); msg = data2.error || msg; } catch { }
         alert(msg);
         return;
       }
@@ -382,7 +373,7 @@ function makeItemRow() {
   const select = document.createElement('select');
   select.innerHTML = '<option value=\"\">Select Item</option>' +
     itemOptionsCache.map(i => `<option value="${i.id}" data-size="${i.size || ''}" data-price="${i.price}">${i.name}</option>`).join('');
-  const size = document.createElement('input'); size.readOnly = true; size.placeholder = 'Size';
+  const size = document.createElement('input'); size.type = 'number'; size.step = '0.01'; size.min = '0'; size.placeholder = 'Size';
   const price = document.createElement('input'); price.type = 'number'; price.step = '0.01'; price.placeholder = 'Price';
   const qty = document.createElement('input'); qty.type = 'number'; qty.placeholder = 'Qty'; qty.min = '1';
   const total = document.createElement('input'); total.readOnly = true; total.placeholder = 'Total';
@@ -439,7 +430,7 @@ if (paidAmountEl) paidAmountEl.addEventListener('input', recalcTotals);
 
 saveBillBtn.addEventListener('click', async () => {
   const bill_number = document.getElementById('bill-number').value || `BILL-${Date.now()}`;
-  const bill_date = document.getElementById('bill-date').value || new Date().toISOString().slice(0,10);
+  const bill_date = document.getElementById('bill-date').value || new Date().toISOString().slice(0, 10);
   const customer_id = Number(billCustomerSelect.value);
   if (!customer_id) { alert('Select a customer'); return; }
   const editId = document.getElementById('edit-bill-id').value;
@@ -540,7 +531,7 @@ async function loadBills(customerId) {
   billsCache = bills;
   billsTableBody.innerHTML = bills.map(b => `
     <tr>
-      <td>${b.id}</td><td>${b.bill_number}</td><td>${String(b.bill_date || '').slice(0,10)}</td><td>${b.customer_name}</td>
+      <td>${b.id}</td><td>${b.bill_number}</td><td>${String(b.bill_date || '').slice(0, 10)}</td><td>${b.customer_name}</td>
       <td>${Number(b.subtotal).toFixed(2)}</td><td>${Number(b.gst_amount).toFixed(2)}</td><td>${Number(b.discount).toFixed(2)}</td><td><strong>${Number(b.grand_total).toFixed(2)}</strong></td>
       <td>${Number(b.paid_amount || 0).toFixed(2)}</td><td><strong style="color:${Number(b.pending_amount || 0) > 0 ? '#ef4444' : '#16a34a'}">${Number(b.pending_amount || 0).toFixed(2)}</strong></td>
       <td>
@@ -577,7 +568,7 @@ async function runSearch() {
   const rows = await res.json();
   searchResultsBody.innerHTML = rows.map(b => `
     <tr onclick="viewBill(${b.id})" style="cursor:pointer">
-      <td>${b.bill_number}</td><td>${String(b.bill_date || '').slice(0,10)}</td><td>${b.customer_name}</td>
+      <td>${b.bill_number}</td><td>${String(b.bill_date || '').slice(0, 10)}</td><td>${b.customer_name}</td>
       <td>${Number(b.grand_total).toFixed(2)}</td><td>${Number(b.paid_amount || 0).toFixed(2)}</td>
       <td><strong style="color:${Number(b.pending_amount || 0) > 0 ? '#ef4444' : '#16a34a'}">${Number(b.pending_amount || 0).toFixed(2)}</strong></td>
       <td>${b.status}</td>
@@ -657,7 +648,7 @@ window.deleteBill = async (id) => {
   }
   await loadBills();
   // If Advanced Search is visible, refresh results too
-  try { if (!document.getElementById('search').classList.contains('hidden')) await runSearch(); } catch {}
+  try { if (!document.getElementById('search').classList.contains('hidden')) await runSearch(); } catch { }
   billDetails.classList.add('hidden');
   alert('Bill deleted');
 };
@@ -687,7 +678,7 @@ window.editBill = async (id) => {
   const newBillBtn = document.querySelector('[data-tab="new-bill"]');
   if (newBillBtn) newBillBtn.click();
   document.getElementById('bill-number').value = b.bill_number || '';
-  document.getElementById('bill-date').value = (b.bill_date || '').slice(0,10);
+  document.getElementById('bill-date').value = (b.bill_date || '').slice(0, 10);
   billCustomerSelect.value = b.customer_id;
   gstPercentEl.value = Number(b.gst_percent || 0);
   discountEl.value = Number(b.subtotal) > 0 ? ((Number(b.discount || 0) / Number(b.subtotal)) * 100).toFixed(2) : 0;
@@ -858,7 +849,7 @@ function renderMonthlyReport() {
       <tr>
         <td>${r.customer_name}</td>
         <td>${r.item_name}</td>
-        <td>${String(r.bill_date || '').slice(0,10)}</td>
+        <td>${String(r.bill_date || '').slice(0, 10)}</td>
         <td>${r.bill_number}</td>
         <td>${Number(r.quantity).toFixed(0)}</td>
         <td>${Number(r.amount).toFixed(2)}</td>
@@ -911,13 +902,13 @@ function renderMonthlyReport() {
 
 function exportReportCsv() {
   const rows = reportCache.rows || [];
-  const headers = ['Customer','Item','Bill Date','Bill #','Quantity','Total Amount','Paid Amount','Pending Amount'];
+  const headers = ['Customer', 'Item', 'Bill Date', 'Bill #', 'Quantity', 'Total Amount', 'Paid Amount', 'Pending Amount'];
   const lines = [headers.join(',')];
   for (const r of rows) {
     const line = [
       `"${(r.customer_name || '').replace(/"/g, '""')}"`,
       `"${(r.item_name || '').replace(/"/g, '""')}"`,
-      String(r.bill_date || '').slice(0,10),
+      String(r.bill_date || '').slice(0, 10),
       `"${(r.bill_number || '').replace(/"/g, '""')}"`,
       Number(r.quantity || 0).toFixed(0),
       Number(r.amount || 0).toFixed(2),
@@ -927,7 +918,7 @@ function exportReportCsv() {
     lines.push(line.join(','));
   }
   lines.push('');
-  lines.push(['Grand Totals','','','', Number(reportCache.totals.quantity || 0).toFixed(0), Number(reportCache.totals.amount || 0).toFixed(2), Number(reportCache.totals.paid || 0).toFixed(2), Number(reportCache.totals.pending || 0).toFixed(2)].join(','));
+  lines.push(['Grand Totals', '', '', '', Number(reportCache.totals.quantity || 0).toFixed(0), Number(reportCache.totals.amount || 0).toFixed(2), Number(reportCache.totals.paid || 0).toFixed(2), Number(reportCache.totals.pending || 0).toFixed(2)].join(','));
   const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1081,7 +1072,7 @@ async function loadOutstandingDetail(id, name) {
   outDetailBody.innerHTML = rows.map(b => `
     <tr>
       <td>${b.bill_number}</td>
-      <td>${String(b.bill_date || '').slice(0,10)}</td>
+      <td>${String(b.bill_date || '').slice(0, 10)}</td>
       <td>${Number(b.grand_total || 0).toFixed(2)}</td>
       <td>${Number(b.paid_amount || 0).toFixed(2)}</td>
       <td class="${Number(b.pending_amount || 0) > 0 ? 'pending-red' : ''}">${Number(b.pending_amount || 0).toFixed(2)}</td>
@@ -1109,7 +1100,7 @@ if (outSearch) outSearch.addEventListener('input', () => {
 });
 function exportOutstandingCsv() {
   const rows = outCache || [];
-  const headers = ['Customer','Mobile','GSTIN','Total Bills','Total Paid','Total Pending'];
+  const headers = ['Customer', 'Mobile', 'GSTIN', 'Total Bills', 'Total Paid', 'Total Pending'];
   const lines = [headers.join(',')];
   for (const r of rows) {
     lines.push([
