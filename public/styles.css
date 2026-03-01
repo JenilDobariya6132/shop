@@ -87,8 +87,8 @@ main {
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
 }
 
 .form-grid input,
@@ -111,11 +111,13 @@ thead th {
   color: var(--text);
   padding: 10px;
   text-align: left;
+  white-space: nowrap;
 }
 
 tbody td {
   border-top: 1px solid #e5e7eb;
   padding: 8px;
+  white-space: nowrap;
 }
 
 .btn {
@@ -177,8 +179,8 @@ tbody td {
 
 .totals {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
   align-items: center;
 }
 
@@ -330,8 +332,8 @@ tbody td {
 
 .dash-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
 }
 
 .stat {
@@ -383,9 +385,7 @@ tbody td {
 }
 
 @media (max-width: 900px) {
-  .dash-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  /* Removed .dash-grid override since it is now fluid */
 }
 
 #login .form-grid,
@@ -413,7 +413,9 @@ tbody td {
 }
 
 #report .form-grid {
-  grid-template-columns: 160px 120px auto auto auto;
+  /* Removed hard-coded columns, falling back to form-grid fluid columns */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
   align-items: center;
 }
 
@@ -538,21 +540,8 @@ tbody td {
 }
 
 @media (max-width: 900px) {
-  .dash-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .form-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .totals {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  #report .form-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  /* Previously we had overrides for .dash-grid, .form-grid, .totals here,
+     but they are now fluid so we can remove them. */
 }
 
 @media (max-width: 768px) {
